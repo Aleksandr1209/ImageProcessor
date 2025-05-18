@@ -54,8 +54,6 @@ public class ImageProcessor {
         };
 
         BufferedImage result = applyConvolutionFilter(new Kernel(3, 3, embossMatrix));
-
-        // Convert to grayscale for better emboss effect
         BufferedImage grayImage = new BufferedImage(
                 result.getWidth(), result.getHeight(), BufferedImage.TYPE_BYTE_GRAY);
         Graphics g = grayImage.getGraphics();
@@ -77,13 +75,8 @@ public class ImageProcessor {
 
         for (int y = radius; y < originalImage.getHeight() - radius; y++) {
             for (int x = radius; x < originalImage.getWidth() - radius; x++) {
-                // Get the pixel values in the neighborhood
                 originalImage.getRGB(x - radius, y - radius, size, size, pixels, 0, size);
-
-                // Sort the pixels to find median
                 java.util.Arrays.sort(pixels);
-
-                // Set the median value
                 result.setRGB(x, y, pixels[pixels.length / 2]);
             }
         }
@@ -94,22 +87,19 @@ public class ImageProcessor {
     public BufferedImage cannyEdgeDetection() {
         if (originalImage == null) return null;
 
-        // Simplified Canny edge detection (actual implementation is more complex)
         BufferedImage grayImage = toGrayscale(originalImage);
 
-        // Apply Gaussian blur
+
         float[] gaussianBlurMatrix = {
                 1/16f, 2/16f, 1/16f,
                 2/16f, 4/16f, 2/16f,
                 1/16f, 2/16f, 1/16f
         };
         BufferedImage blurred = applyConvolutionFilter(grayImage, new Kernel(3, 3, gaussianBlurMatrix));
-
-        // Apply Sobel operator (simplification of Canny)
         BufferedImage sobelX = applySobel(blurred, true);
         BufferedImage sobelY = applySobel(blurred, false);
 
-        // Combine gradients
+
         BufferedImage result = new BufferedImage(
                 originalImage.getWidth(), originalImage.getHeight(), BufferedImage.TYPE_BYTE_GRAY);
 
@@ -119,7 +109,7 @@ public class ImageProcessor {
                 int gy = new Color(sobelY.getRGB(x, y)).getRed();
                 int gradient = (int) Math.sqrt(gx * gx + gy * gy);
                 gradient = Math.min(255, Math.max(0, gradient));
-                int edge = gradient > 50 ? 255 : 0; // Simple threshold
+                int edge = gradient > 50 ? 255 : 0;
                 result.setRGB(x, y, new Color(edge, edge, edge).getRGB());
             }
         }
@@ -136,7 +126,7 @@ public class ImageProcessor {
 
         for (int y = 0; y < grayImage.getHeight() - 1; y++) {
             for (int x = 0; x < grayImage.getWidth() - 1; x++) {
-                // Roberts cross operator
+
                 int p1 = new Color(grayImage.getRGB(x, y)).getRed();
                 int p2 = new Color(grayImage.getRGB(x + 1, y + 1)).getRed();
                 int p3 = new Color(grayImage.getRGB(x + 1, y)).getRed();
